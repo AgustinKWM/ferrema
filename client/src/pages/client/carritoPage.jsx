@@ -1,4 +1,3 @@
-import { useContext } from "react";
 import { useCart } from "../../context/cartContext";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -15,8 +14,8 @@ const CarritoPage = () => {
       return;
     }
 
-    if (!totalPrice || totalPrice <= 0) {
-      alert("El carrito está vacío o el monto es inválido.");
+    if (totalPrice === undefined || totalPrice === null) {
+      alert("El total del carrito es inválido.");
       return;
     }
 
@@ -29,7 +28,7 @@ const CarritoPage = () => {
         body: JSON.stringify({
           buy_order: "orden-" + Date.now(),
           session_id: user.id || "session-default",
-          amount: Number(totalPrice?.toFixed(2)) || 0,
+          amount: parseFloat(totalPrice.toFixed(2)),
           return_url: window.location.origin + "/payment-result",
         }),
       });
@@ -37,7 +36,7 @@ const CarritoPage = () => {
       const data = await response.json();
 
       if (data.url) {
-        clearCart(); // Opcional: puedes moverlo a cuando confirmes el pago
+        clearCart();
         window.location.href = data.url;
       } else {
         alert("No se pudo iniciar el pago.");
@@ -56,9 +55,9 @@ const CarritoPage = () => {
         <p>No tienes productos en el carrito.</p>
       ) : (
         <>
-          {cart.map((item, index) => (
+          {cart.map((item) => (
             <div
-              key={`${item.id}-${index}`} // <-- clave única corregida
+              key={`${item.id}-${item.nombre}`} // Mejora clave para evitar conflictos
               style={{
                 border: "1px solid #ccc",
                 margin: "10px 0",
@@ -70,10 +69,7 @@ const CarritoPage = () => {
                 <strong>{item.nombre}</strong>
               </p>
               <p>
-                Precio: $
-                {item.precio !== undefined && item.precio !== null
-                  ? item.precio.toFixed(2)
-                  : "0.00"}
+                Precio: ${item.precio ? item.precio.toFixed(2) : "0.00"}
               </p>
               <p>Cantidad: {item.quantity}</p>
               <button
@@ -120,4 +116,3 @@ const CarritoPage = () => {
 };
 
 export default CarritoPage;
-
